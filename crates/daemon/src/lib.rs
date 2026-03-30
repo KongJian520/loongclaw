@@ -75,6 +75,7 @@ pub use kernel;
 pub use sha2;
 
 pub mod audit_cli;
+mod i18n;
 mod browser_companion_diagnostics;
 pub mod browser_preview;
 #[cfg(test)]
@@ -140,33 +141,29 @@ pub fn active_cli_command_name() -> &'static str {
 }
 
 fn render_welcome_long_about(command_name: &str) -> String {
-    format!(
-        "Show the configured welcome banner and quick commands.\n\nquick commands:\n- {command_name} ask --config <path> --message \"...\"\n- {command_name} chat --config <path>\n- {command_name} doctor --config <path>\n- {command_name} --help\n\nReplace <path> with your current config path, or set LOONGCLAW_CONFIG_PATH first."
-    )
+    crate::i18n::tr_fmt("welcome_long_about", &[("command_name", command_name)])
 }
 
 fn render_import_long_about(command_name: &str) -> String {
-    format!(
-        "Power-user import flow for previewing or applying detected migration sources explicitly.\n\nUse this when you want exact CLI control over which source and domains are reused. If you want the guided path, use `{command_name} onboard` instead. When the same source kind resolves to multiple detected configs, rerun with `--source-path <path>` to choose one exact source."
-    )
+    crate::i18n::tr_fmt("import_long_about", &[("command_name", command_name)])
 }
 
 fn render_migrate_long_about(command_name: &str) -> String {
-    format!(
-        "Power-user migration flow for discovering, previewing, or applying legacy claw nativeization explicitly.\n\nUse this when you want exact CLI control over migration mode selection and output handling for older claw-family workspaces. If you want the guided path, use `{command_name} onboard` instead.\n\nMode quick reference:\n- discover, plan_many, recommend_primary, merge_profiles, map_external_skills: require `--input`\n- plan: requires `--input`; `--output` is optional preview target\n- apply: requires `--input` and `--output`\n- apply_selected: requires `--input` and `--output`; use `--source-id` to pin one discovered source, and `--apply-external-skills-plan` to bridge installable local external skills into the managed runtime\n- rollback_last_apply: requires `--output`"
-    )
+    crate::i18n::tr_fmt("migrate_long_about", &[("command_name", command_name)])
 }
 
 fn render_ask_long_about(command_name: &str) -> String {
-    format!(
-        "Run one non-interactive one-shot assistant turn.\n\nUse this when you want a fast answer without entering the interactive `{command_name} chat` REPL. The command reuses the normal CLI conversation runtime, session memory, provider selection, and ACP options."
-    )
+    crate::i18n::tr_fmt("ask_long_about", &[("command_name", command_name)])
 }
 
 pub fn build_cli_command(command_name: &'static str) -> clap::Command {
+    // initialize i18n from environment so help/long_about strings can be localized
+    crate::i18n::init_from_env();
+
     Cli::command()
         .name(command_name)
         .bin_name(command_name)
+        .about(crate::i18n::tr("cli_about"))
         .mut_subcommand("welcome", |command| {
             command.long_about(render_welcome_long_about(command_name))
         })
@@ -183,7 +180,14 @@ pub fn build_cli_command(command_name: &'static str) -> clap::Command {
 
 pub fn parse_cli() -> Cli {
     let mut matches = build_cli_command(active_cli_command_name()).get_matches();
-    Cli::from_arg_matches_mut(&mut matches).unwrap_or_else(|error| error.exit())
+    let mut cli = Cli::from_arg_matches_mut(&mut matches).unwrap_or_else(|error| error.exit());
+    if cli.lang.is_none() {
+        cli.lang = std::env::var("LOONGCLAW_LANG").or_else(|_| std::env::var("LANG")).ok();
+    }
+    if let Some(ref lang) = cli.lang {
+        crate::i18n::init(lang);
+    }
+    cli
 }
 
 pub fn native_spec_tool_executor(
@@ -277,12 +281,11 @@ impl std::str::FromStr for MultiChannelServeChannelAccount {
 }
 
 #[derive(Parser, Debug)]
-#[command(
-    name = CLI_COMMAND_NAME,
-    about = "LoongClaw low-level runtime daemon",
-    version
-)]
+#[command(name = CLI_COMMAND_NAME, version)]
 pub struct Cli {
+    /// Preferred language for runtime output (e.g. zh-CN, en-US)
+    #[arg(long)]
+    pub lang: Option<String>,
     #[command(subcommand)]
     pub command: Option<Commands>,
 }

@@ -1,0 +1,7 @@
+{
+  "welcome_long_about": "显示已配置的欢迎横幅和快速命令。\n\n快速命令：\n- {command_name} ask --config <path> --message \"...\"\n- {command_name} chat --config <path>\n- {command_name} doctor --config <path>\n- {command_name} --help\n\n将 <path> 替换为当前配置路径，或先设置环境变量 LOONGCLAW_CONFIG_PATH。",
+  "import_long_about": "面向高级用户的导入流程，用于预览或明确应用检测到的迁移来源。\n\n当你需要对要重用的来源和域进行精确的 CLI 控制时使用此项。如果你需要引导式路径，请使用 \"{command_name} onboard\"。当相同来源类型解析为多个检测到的配置时，使用 \"--source-path <path>\" 重新运行以选择具体来源。",
+  "migrate_long_about": "面向高级用户的迁移流程，用于发现、预览或明确地应用旧版 claw 的本地化迁移。\n\n当你需要对迁移模式选择和输出处理进行精确 CLI 控制时使用此项。如果你需要引导式路径，请使用 \"{command_name} onboard\"。\n\n模式速览：\n- discover, plan_many, recommend_primary, merge_profiles, map_external_skills：需要 \"--input\"\n- plan：需要 \"--input\"；\"--output\" 为可选预览目标\n- apply：需要 \"--input\" 和 \"--output\"\n- apply_selected：需要 \"--input\" 和 \"--output\"；使用 \"--source-id\" 固定一个发现的来源，并使用 \"--apply-external-skills-plan\" 将可安装的本地外部技能桥接到托管运行时\n- rollback_last_apply：需要 \"--output\"",
+  "ask_long_about": "运行一次非交互式的一次性助理回合。\n\n当你想要快速获得答案而不进入交互式 \"{command_name} chat\" REPL 时使用此命令。该命令重用正常的 CLI 会话运行时、会话内存、提供器选择和 ACP 选项。",
+  "cli_about": "LoongClaw 低级运行时守护进程"
+}

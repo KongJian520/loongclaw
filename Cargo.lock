@@ -2207,6 +2207,7 @@ dependencies = [
  "loongclaw-contracts",
  "loongclaw-kernel",
  "loongclaw-spec",
+ "once_cell",
  "rand 0.10.0",
  "reqwest",
  "rusqlite",
